@@ -1,0 +1,193 @@
+﻿@model IEnumerable<Truck_Management_System.ViewModels.TruckAssignmentViewModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="assignments" class="page-section">
+    <div class="header">
+        <h1>Truck Assignments</h1>
+        <button class="btn btn-primary" onclick="openModal('assignTruckModal')">+ New Assignment</button>
+    </div>
+
+    <div class="content-card">
+        <h2>All Assignments</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Assignments</th>
+                        <th>Truck Number</th>
+                        <th>Routes</th>
+                        <th>Total Distance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Assignments</td>
+                                <td>@item.TruckNumber</td>
+                                <td>@string.Join(", ", item.Routes)</td>
+                                <td>@item.TotalDistance KM</td>
+                                <td><button class="btn btn-danger btn-sm">Delete</button></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" style="text-align:center;color:#95a5a6;">No assignments yet</td>
+                        </tr>
+                    }
+                </tbody>
+
+
+            </table>
+        </div>
+    </div>
+</div>
+<div id="assignTruckModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Assign Truck to Routes</h2>
+            <button class="close-btn" onclick="closeModal('assignTruckModal')">&times;</button>
+        </div>
+        <form id="assignTruckForm">
+            <div class="form-group">
+                <label>Select Truck</label>
+                <select id="assignTruck" required>
+                    <option value="">Choose a truck</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Select Routes (Multiple)</label>
+                <div id="routesList" class="route-selection">
+                    <p style="color: #95a5a6; padding: 10px;">No routes available. Please add routes first.</p>
+                </div>
+            </div>
+            <div id="routeDetailsContainer" class="route-details" style="display: none;">
+                <h3 style="margin-bottom: 15px;">Route Details</h3>
+                <div id="selectedRoutesDetails"></div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('assignTruckModal')">Cancel</button>
+                <button type="submit" class="btn btn-success">Assign Truck</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    async function loadDropdownData() {
+        const res = await fetch('/TruckAssignment/GetDropdownData');
+        const data = await res.json();
+
+        // Populate trucks dropdown
+        const truckSelect = document.getElementById('assignTruck');
+        truckSelect.innerHTML = `<option value="">Choose a truck</option>`;
+        data.trucks.forEach(t => {
+            truckSelect.innerHTML += `<option value="${t.id}">${t.truckNumber}</option>`;
+        });
+
+        // Populate routes list
+        const routeList = document.getElementById('routesList');
+        if (data.routes.length > 0) {
+    routeList.innerHTML = data.routes.map(r => `
+        <div class="route-checkbox">
+            <input type="checkbox" value="${r.id}" class="routeCheckbox" onchange="toggleRouteDetails()">
+            <label>${r.routeName}</label>
+        </div>
+    `).join('');
+        } else {
+            routeList.innerHTML = `<p style="color:#95a5a6;padding:10px;">No routes available.</p>`;
+        }
+    }
+
+    function toggleRouteDetails() {
+        const selected = Array.from(document.querySelectorAll('.routeCheckbox:checked'));
+        const detailsContainer = document.getElementById('routeDetailsContainer');
+        const details = document.getElementById('selectedRoutesDetails');
+
+        if (selected.length > 0) {
+            detailsContainer.style.display = 'block';
+            details.innerHTML = selected.map(chk => `
+                <div class="route-detail">
+                    <label>${chk.nextSibling.textContent.trim()}</label>
+                    <input type="number" placeholder="Price (PKR)" data-route="${chk.value}" class="routePrice">
+                    <input type="number" placeholder="Petrol (L/KM)" data-route="${chk.value}" class="routePetrol">
+                </div>
+            `).join('');
+        } else {
+            detailsContainer.style.display = 'none';
+            details.innerHTML = '';
+        }
+    }
+
+    document.getElementById("assignTruckForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const truckId = document.getElementById("assignTruck").value;
+        const selectedRoutes = Array.from(document.querySelectorAll(".routeCheckbox:checked"));
+
+        const routeDetails = selectedRoutes.map(chk => ({
+            RouteId: parseInt(chk.value),
+            Price: parseFloat(document.querySelector(`.routePrice[data-route='${chk.value}']`).value),
+            PetrolConsumption: parseFloat(document.querySelector(`.routePetrol[data-route='${chk.value}']`).value)
+        }));
+
+        const data = { TruckId: parseInt(truckId), RouteDetails: routeDetails };
+
+        const response = await fetch('/TruckAssignment/AssignTruck', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        alert(result.message);
+        if (result.success) {
+            closeModal('assignTruckModal');
+            location.reload();
+        }
+    });
+
+    function openModal(id) {
+        document.getElementById(id).style.display = 'block';
+        if (id === 'assignTruckModal') loadDropdownData();
+    }
+
+    document.getElementById('assignTruckForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const truckId = document.getElementById('assignTruck').value;
+        const selectedRoutes = Array.from(document.querySelectorAll('.route-checkbox input:checked')).map(cb => cb.value);
+
+
+        const assignment = {
+            id: assignments.length + 1,
+            truckId: truckId,
+            routes: []
+        };
+
+        selectedRoutes.forEach(routeId => {
+            const route = routes.find(r => r.id == routeId);
+            const price = document.getElementById(`price_${routeId}`).value;
+            const petrol = document.getElementById(`petrol_${routeId}`).value;
+
+            assignment.routes.push({
+                routeId: routeId,
+                routeName: `${route.from} - ${route.to}`,
+                distance: route.distance,
+                price: price,
+                petrol: petrol
+            });
+        });
+
+        assignments.push(assignment);
+
+        closeModal('assignTruckModal');
+        this.reset();
+        document.getElementById('routeDetailsContainer').style.display = 'none';
+    });
+
+</script>

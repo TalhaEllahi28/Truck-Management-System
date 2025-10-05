@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truck Management System</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h2>🚛 TruckFlow</h2>
+            <p>Management System</p>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item @(ViewBag.ActivePage == "Dashboard" ? "active" : "")">
+                <a asp-controller="Dashboard" asp-action="Home">📊 Dashboard</a>
+            </li>
+            <li class="nav-item @(ViewBag.ActivePage == "Routes" ? "active" : "")">
+                <a asp-controller="Routes" asp-action="Home">🗺️ Routes</a>
+            </li>
+            <li class="nav-item @(ViewBag.ActivePage == "Trucks" ? "active" : "")">
+                <a asp-controller="Trucks" asp-action="Home">🚚 Trucks</a>
+            </li>
+            <li class="nav-item @(ViewBag.ActivePage == "Assignments" ? "active" : "")">
+                <a asp-controller="TruckAssignment" asp-action="Home">📋 Assignments</a>
+            </li>
+            @*  <li class="nav-item @(ViewBag.ActivePage == "Reports" ? "active" : "")">
+        <a asp-controller="Reports" asp-action="Home">📈 Reports</a>
+    </li> *@
+        </ul>
+
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        @RenderBody()
+
+
+@*         <!-- Reports Section -->
+        <div id="reports" class="page-section">
+            <div class="header">
+                <h1>Reports & Analytics</h1>
+            </div>
+
+            <div class="content-card">
+                <h2>Assigned Trucks with Routes</h2>
+                <div id="reportContent">
+                    <p style="color: #95a5a6;">No data available for reports</p>
+                </div>
+            </div>
+        </div> *@
+    </div>
+
+
+
+
+
+
+    <script src="~/js/site.js"></script>
+
+</body>
+</html>
+
+

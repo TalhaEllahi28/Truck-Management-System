@@ -1,0 +1,121 @@
+﻿@model IEnumerable<Truck_Management_System.Models.Route>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="routes" class="page-section">
+    <div class="header">
+        <h1>Routes Management</h1>
+        <button class="btn btn-primary" onclick="openModal('addRouteModal')">+ Add Route</button>
+    </div>
+
+    <div class="content-card">
+        <h2>All Routes</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Route ID</th>
+                        <th>From - To</th>
+                        <th>Distance (KM)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="routesTable">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var route in Model)
+                        {
+                            <tr>
+                                <td>@route.Id</td>
+                                <td>@route.FromCity - @route.ToCity</td>
+                                <td>@route.DistanceKm</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm">Delete</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #95a5a6;">No routes added yet</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Add Route Modal -->
+<div id="addRouteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Route</h2>
+            <button class="close-btn" onclick="closeModal('addRouteModal')">&times;</button>
+        </div>
+        <form id="addRouteForm">
+            <div class="form-group">
+                <label>From City</label>
+                <input type="text" id="routeFrom" placeholder="e.g., Islamabad" required>
+            </div>
+            <div class="form-group">
+                <label>To City</label>
+                <input type="text" id="routeTo" placeholder="e.g., Karachi" required>
+            </div>
+            <div class="form-group">
+                <label>Distance (KM)</label>
+                <input type="number" id="routeDistance" placeholder="e.g., 1400" required>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addRouteModal')">Cancel</button>
+                <button type="submit" class="btn btn-success">Add Route</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    document.getElementById("addRouteForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const route = {
+            FromCity: document.getElementById("routeFrom").value,
+            ToCity: document.getElementById("routeTo").value,
+            DistanceKm: parseFloat(document.getElementById("routeDistance").value)
+        };
+
+        const response = await fetch('/Routes/AddRoute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(route)
+        });
+
+        const result = await response.json();
+        alert(result.message);
+
+        if (result.success) {
+            closeModal('addRouteModal');
+            location.reload();
+        }
+    });
+
+
+        // Add Route
+    document.getElementById('addRouteForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const route = {
+            id: routes.length + 1,
+            from: document.getElementById('routeFrom').value,
+            to: document.getElementById('routeTo').value,
+            distance: document.getElementById('routeDistance').value
+        };
+        routes.push(route);
+        closeModal('addRouteModal');
+        this.reset();
+    });
+
+</script>

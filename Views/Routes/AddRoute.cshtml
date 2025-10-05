@@ -1,0 +1,29 @@
+﻿    <!-- Add Route Modal -->
+    <div id="addRouteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Route</h2>
+                <button class="close-btn" onclick="closeModal('addRouteModal')">&times;</button>
+            </div>
+            <form id="addRouteForm">
+                <div class="form-group">
+                    <label>From City</label>
+                    <input type="text" id="routeFrom" placeholder="e.g., Islamabad" required>
+                </div>
+                <div class="form-group">
+                    <label>To City</label>
+                    <input type="text" id="routeTo" placeholder="e.g., Karachi" required>
+                </div>
+                <div class="form-group">
+                    <label>Distance (KM)</label>
+                    <input type="number" id="routeDistance" placeholder="e.g., 1400" required>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addRouteModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success">Add Route</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+

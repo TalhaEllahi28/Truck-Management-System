@@ -1,0 +1,122 @@
+﻿@model IEnumerable<Truck_Management_System.Models.Truck>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="trucks" class="page-section">
+    <div class="header">
+        <h1>Trucks Management</h1>
+        <button class="btn btn-primary" onclick="openModal('addTruckModal')">+ Add Truck</button>
+    </div>
+
+    <div class="content-card">
+        <h2>All Trucks</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Truck Number</th>
+                        <th>Color</th>
+                        <th>Size (Tyres)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="trucksTable">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var truck in Model)
+                        {
+                            <tr>
+                                <td>@truck.TruckNumber</td>
+                                <td>@truck.Color</td>
+                                <td>@truck.Tyres</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm">Delete</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #95a5a6;">No trucks added yet</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>
+<div id="addTruckModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Truck</h2>
+            <button class="close-btn" onclick="closeModal('addTruckModal')">&times;</button>
+        </div>
+        <form id="addTruckForm">
+            <div class="form-group">
+                <label>Truck Number</label>
+                <input type="text" id="truckNumber" placeholder="e.g., LHE-1234" required>
+            </div>
+            <div class="form-group">
+                <label>Truck Color</label>
+                <input type="text" id="truckColor" placeholder="e.g., White" required>
+            </div>
+            <div class="form-group">
+                <label>Truck Size (Number of Tyres)</label>
+                <select id="truckSize" required>
+                    <option value="">Select Size</option>
+                    <option value="6">6 Tyres (Small)</option>
+                    <option value="10">10 Tyres (Medium)</option>
+                    <option value="18">18 Tyres (Large)</option>
+                    <option value="22">22 Tyres (Extra Large)</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addTruckModal')">Cancel</button>
+                <button type="submit" class="btn btn-success">Add Truck</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    document.getElementById("addTruckForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const truck = {
+            TruckNumber: document.getElementById("truckNumber").value,
+            Color: document.getElementById("truckColor").value,
+            Tyres: parseInt(document.getElementById("truckSize").value),
+        };
+
+        const response = await fetch('/Trucks/AddTruck', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(truck)
+        });
+
+        const result = await response.json();
+        alert(result.message);
+
+        if (result.success) {
+            closeModal('addTruckModal');
+            location.reload();
+        }
+    });
+        // Add Truck
+    document.getElementById('addTruckForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const truck = {
+            id: trucks.length + 1,
+            number: document.getElementById('truckNumber').value,
+            color: document.getElementById('truckColor').value,
+            size: document.getElementById('truckSize').value,
+            status: 'Available'
+        };
+        trucks.push(truck);
+
+        closeModal('addTruckModal');
+        this.reset();
+    });
+
+</script>
